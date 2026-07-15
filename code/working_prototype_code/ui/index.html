@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SoundSwitch</title>
+<style>
+  :root {
+    --bg: #B8D8D8;
+    --panel-bg: #ffffff;
+    --teal: #22577A;
+    --navy: #22031F;
+    --text: #22031F;
+    --off-track: #D7E4E2;
+    --glow: rgba(34, 87, 122, 0.28);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 50px 20px;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .app-header {
+    margin-bottom: 26px;
+  }
+  .app-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+  .app-subtitle {
+    font-size: 13px;
+    color: var(--teal);
+    margin-top: 2px;
+  }
+
+  .panel-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--teal);
+    margin-bottom: 8px;
+  }
+  .spectrogram-placeholder {
+    width: 100%;
+    height: 120px;
+    border-radius: 16px;
+    background: var(--panel-bg);
+    margin-bottom: 28px;
+    display: block;
+  }
+
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .card {
+    background: var(--panel-bg);
+    border-radius: 18px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid transparent;
+  }
+  .card-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--navy);
+  }
+  .card-meta {
+    font-size: 11px;
+    color: var(--text);
+    opacity: 0.6;
+    margin-top: 3px;
+  }
+
+  /* Presence-gated cards (Chatter/Traffic/Mechanical Hums) fade in/out
+     based on whether that category is currently detected -- a soft
+     transition rather than an abrupt pop, since sudden UI changes are
+     exactly the kind of thing this app is trying to reduce, not add. */
+  .presence-gated {
+    overflow: hidden;
+    transition: opacity 0.4s ease, max-height 0.4s ease, margin 0.4s ease, padding 0.4s ease;
+    max-height: 80px;
+  }
+  .presence-gated.not-present {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin: 0;
+    border-width: 0;
+  }
+
+  /* Toggleable categories (Traffic, Mechanical Hums, Chatter) */
+  .switch {
+    width: 44px;
+    height: 26px;
+    border-radius: 999px;
+    background: var(--teal);
+    position: relative;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .switch::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    transition: left 0.15s ease, right 0.15s ease;
+  }
+  .switch.off {
+    background: var(--off-track);
+  }
+  .switch.off::after {
+    right: auto;
+    left: 3px;
+  }
+
+  /* Always-on categories (Speech, Other) -- not clickable, no backend
+     toggle exists for these: Speech is always protected by design, and
+     Other has no suppression logic at all (never muted regardless). */
+  .tag {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--teal);
+    background: var(--off-track);
+    padding: 5px 10px;
+    border-radius: 999px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="app-header">
+      <div class="app-title">SoundSwitch</div>
+      <div class="app-subtitle">live category control</div>
+    </div>
+
+    <div class="panel-label">Live Audio Visualizer</div>
+    <canvas id="spectrogram" class="spectrogram-placeholder"></canvas>
+
+    <div class="cards">
+      <div class="card">
+        <div><div class="card-name">Speech</div><div class="card-meta">direct speech &amp; conversation</div></div>
+        <div class="tag">always on</div>
+      </div>
+      <div class="card presence-gated not-present" data-presence-category="Chatter">
+        <div><div class="card-name">Chatter</div><div class="card-meta">background/distant voices</div></div>
+        <div class="switch off" data-category="Chatter"></div>
+      </div>
+      <div class="card presence-gated not-present" data-presence-category="Traffic">
+        <div><div class="card-name">Traffic</div><div class="card-meta">vehicles, horns, road noise</div></div>
+        <div class="switch off" data-category="Traffic"></div>
+      </div>
+      <div class="card">
+        <div><div class="card-name">Mechanical Hums</div><div class="card-meta">engines, fans, static</div></div>
+        <div class="switch off" data-category="Mechanical Hums"></div>
+      </div>
+      <div class="card">
+        <div><div class="card-name">Other</div><div class="card-meta">unclassified sounds</div></div>
+        <div class="tag">always on</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // "off" switch class means that category IS in the backend's muted set
+  // (sound OFF/suppressed). No class means it's unmuted (sound ON/audible).
+  // This matches the visual convention already in the design: the switch
+  // knob sits right + teal-filled when the category is fully audible.
+  const switches = document.querySelectorAll(".switch[data-category]");
+
+  function isMuted(el) {
+    return el.classList.contains("off");
+  }
+
+  function render(el, muted) {
+    el.classList.toggle("off", muted);
+  }
+
+  async function loadState() {
+    const res = await fetch("/api/state");
+    const data = await res.json();
+    switches.forEach((el) => {
+      render(el, data.muted.includes(el.dataset.category));
+    });
+  }
+
+  async function toggle(el) {
+    const category = el.dataset.category;
+    const wasMuted = isMuted(el);
+    const nextMuted = !wasMuted;
+    render(el, nextMuted);  // optimistic update
+
+    try {
+      const res = await fetch("/api/toggle", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ category, muted: nextMuted }),
+      });
+      const data = await res.json();
+      render(el, data.muted.includes(category));  // reconcile with server truth
+    } catch (err) {
+      render(el, wasMuted);  // revert on failure
+      console.error("Toggle failed:", err);
+    }
+  }
+
+  switches.forEach((el) => el.addEventListener("click", () => toggle(el)));
+  loadState();
+
+  // Presence-gated visibility: only show a category's card while its
+  // classifier (soundswitch/presence_classifier.py, ~1s cadence) currently
+  // detects it. Muting state itself lives entirely on the backend
+  // (suppressor.muted_categories), so hiding a card doesn't lose or reset
+  // whatever it was set to -- it just won't be visible/controllable again
+  // until that category is detected present.
+  const presenceCards = document.querySelectorAll(".presence-gated[data-presence-category]");
+
+  async function pollPresence() {
+    try {
+      const res = await fetch("/api/presence");
+      const data = await res.json();
+      presenceCards.forEach((card) => {
+        const category = card.dataset.presenceCategory;
+        const isPresent = !!data.active[category];
+        card.classList.toggle("not-present", !isPresent);
+      });
+    } catch (err) {
+      // Server unreachable this tick -- just retry on the next interval.
+    }
+  }
+
+  pollPresence();
+  setInterval(pollPresence, 1000);  // matches the backend classifier's own ~1s check cadence
+
+  // Live audio visualizer: a flowing symmetric wave band (like a Siri/voice-
+  // assistant style waveform), mirrored above/below a center line. Reads the
+  // same post-suppression magnitude bins from the backend (soundswitch/
+  // streaming.py's StreamingSuppressor.latest_spectrum, 48 bins, log-spaced
+  // across frequency), so muting a category still visibly changes what's
+  // drawn -- only the rendering style changed.
+  const canvas = document.getElementById("spectrogram");
+  const ctx = canvas.getContext("2d");
+  const N_POINTS = 48;
+  // Fast attack (jumps up almost immediately) / slow release (eases back
+  // down) -- the same envelope shape a real VU meter uses, so the wave feels
+  // responsive on transients but doesn't flicker between polls.
+  const ATTACK = 0.6;
+  const RELEASE = 0.12;
+  let targetBins = new Array(N_POINTS).fill(0);
+  let smoothedBins = new Array(N_POINTS).fill(0);
+
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.round(rect.width);
+    canvas.height = Math.round(rect.height);
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  function toneColor(v) {
+    // Interpolate from the panel's pale background tone up to navy/teal as
+    // magnitude increases, so it stays visually in-theme rather than a
+    // generic heatmap.
+    const t = Math.min(1, Math.max(0, v));
+    const r = Math.round(216 + (34 - 216) * t);
+    const g = Math.round(232 + (87 - 232) * t);
+    const b = Math.round(226 + (122 - 226) * t);
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  function drawWave() {
+    const w = canvas.width, h = canvas.height;
+    if (w < 2 || h < 1) return;
+    ctx.clearRect(0, 0, w, h);
+
+    const centerY = h / 2;
+    const AMPLITUDE_SCALE = 0.45;  // keeps peaks well clear of the panel edges
+    const amplitude = (h / 2 - 4) * AMPLITUDE_SCALE;
+
+    const slotWidth = w / N_POINTS;
+    const gap = slotWidth * 0.35;
+    const strokeWidth = Math.max(1.5, slotWidth - gap);
+    const minOffset = 2;  // small visible nub even at silence, instead of vanishing
+
+    ctx.lineCap = "round";
+    for (let i = 0; i < N_POINTS; i++) {
+      const target = targetBins[i] || 0;
+      const current = smoothedBins[i];
+      const rate = target > current ? ATTACK : RELEASE;
+      smoothedBins[i] = current + (target - current) * rate;
+
+      const offset = Math.max(minOffset, smoothedBins[i] * amplitude);
+      const x = i * slotWidth + slotWidth / 2;
+
+      ctx.strokeStyle = toneColor(smoothedBins[i]);
+      ctx.lineWidth = strokeWidth;
+      ctx.beginPath();
+      ctx.moveTo(x, centerY - offset);
+      ctx.lineTo(x, centerY + offset);
+      ctx.stroke();
+    }
+
+    requestAnimationFrame(drawWave);
+  }
+
+  async function pollSpectrogram() {
+    try {
+      const res = await fetch("/api/spectrogram");
+      const data = await res.json();
+      if (data.bins && data.bins.length) targetBins = data.bins;
+    } catch (err) {
+      // Server unreachable this tick -- just retry on the next interval.
+    }
+  }
+
+  setInterval(pollSpectrogram, 80);
+  requestAnimationFrame(drawWave);
+</script>
+
+</body>
+</html>

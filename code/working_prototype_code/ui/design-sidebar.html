@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SoundSwitch — Sidebar</title>
+<style>
+  :root {
+    --light-blue: #B8D8D8;
+    --baltic-blue: #22577A;
+    --midnight-violet: #22031F;
+    --panel-bg: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--light-blue);
+    color: var(--midnight-violet);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  .app {
+    width: 100%;
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 20px;
+    background: var(--panel-bg);
+    border: 1px solid var(--baltic-blue);
+    border-radius: 16px;
+    overflow: hidden;
+    min-height: 480px;
+  }
+  .sidebar {
+    background: var(--baltic-blue);
+    color: #fff;
+    padding: 26px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .sidebar h1 {
+    font-size: 18px;
+    margin: 0 0 24px;
+    letter-spacing: 0.02em;
+  }
+  .nav-item {
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .nav-item.active {
+    background: rgba(255,255,255,0.16);
+  }
+  .nav-item .desc {
+    font-size: 11px;
+    font-weight: 400;
+    opacity: 0.75;
+    margin-top: 2px;
+  }
+  .content {
+    padding: 26px 28px;
+  }
+  .panel-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--baltic-blue);
+    margin-bottom: 12px;
+  }
+  .spectrogram-placeholder {
+    width: 100%;
+    height: 220px;
+    border-radius: 10px;
+    background: var(--light-blue);
+    margin-bottom: 28px;
+  }
+  .status {
+    font-size: 13px;
+    color: var(--baltic-blue);
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="sidebar">
+      <h1>SoundSwitch</h1>
+      <div class="nav-item active">Speech<div class="desc">direct speech &amp; conversation</div></div>
+      <div class="nav-item">Traffic<div class="desc">vehicles, horns, road noise</div></div>
+      <div class="nav-item">Mechanical Hums<div class="desc">engines, fans, static</div></div>
+      <div class="nav-item">Other<div class="desc">always audible</div></div>
+    </div>
+    <div class="content">
+      <div class="panel-label">Live Spectrogram</div>
+      <div class="spectrogram-placeholder"></div>
+      <div class="status">Category list on the left doubles as the mute panel.</div>
+    </div>
+  </div>
+</body>
+</html>

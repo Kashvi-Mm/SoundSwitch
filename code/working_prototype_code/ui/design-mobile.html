@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SoundSwitch — Mobile</title>
+<style>
+  :root {
+    --light-blue: #B8D8D8;
+    --baltic-blue: #22577A;
+    --midnight-violet: #22031F;
+    --panel-bg: #ffffff;
+    --off-track: #d7e4e2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #eef2f1;
+    color: var(--midnight-violet);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+  }
+
+  /* Real iPhone-ish dimensions (393x852 pt, iPhone 15). Bezel is neutral
+     graphite, not brand color -- device chrome vs. app content are separate;
+     only what's on-screen should carry the palette. */
+  .phone {
+    width: 393px;
+    height: 852px;
+    background: #1c1c1e;
+    border-radius: 56px;
+    padding: 14px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25);
+  }
+  .screen {
+    width: 100%;
+    height: 100%;
+    background: var(--light-blue);
+    border-radius: 42px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 22px;
+    position: relative;
+  }
+  .notch {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90px;
+    height: 26px;
+    background: #1c1c1e;
+    border-radius: 20px;
+  }
+
+  .app-header {
+    margin-top: 34px;
+    margin-bottom: 22px;
+  }
+  .app-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--midnight-violet);
+  }
+  .app-subtitle {
+    font-size: 12px;
+    color: var(--baltic-blue);
+    margin-top: 2px;
+  }
+
+  .panel-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--baltic-blue);
+    margin-bottom: 8px;
+  }
+  .spectrogram-placeholder {
+    width: 100%;
+    height: 110px;
+    border-radius: 16px;
+    background: var(--panel-bg);
+    margin-bottom: 24px;
+  }
+
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .card {
+    background: var(--panel-bg);
+    border-radius: 18px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--midnight-violet);
+  }
+  .card-meta {
+    font-size: 11px;
+    color: var(--baltic-blue);
+    margin-top: 3px;
+  }
+  .switch {
+    width: 44px;
+    height: 26px;
+    border-radius: 999px;
+    background: var(--baltic-blue);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .switch::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+  }
+  .switch.off {
+    background: var(--off-track);
+  }
+  .switch.off::after {
+    right: auto;
+    left: 3px;
+  }
+</style>
+</head>
+<body>
+  <div class="phone">
+    <div class="screen">
+      <div class="notch"></div>
+      <div class="app-header">
+        <div class="app-title">SoundSwitch</div>
+        <div class="app-subtitle">live category control</div>
+      </div>
+
+      <div class="panel-label">Live Spectrogram</div>
+      <div class="spectrogram-placeholder"></div>
+
+      <div class="cards">
+        <div class="card">
+          <div><div class="card-name">Speech</div><div class="card-meta">direct speech</div></div>
+          <div class="switch"></div>
+        </div>
+        <div class="card">
+          <div><div class="card-name">Traffic</div><div class="card-meta">vehicles, horns</div></div>
+          <div class="switch off"></div>
+        </div>
+        <div class="card">
+          <div><div class="card-name">Mechanical Hums</div><div class="card-meta">engines, fans</div></div>
+          <div class="switch off"></div>
+        </div>
+        <div class="card">
+          <div><div class="card-name">Other</div><div class="card-meta">always audible</div></div>
+          <div class="switch"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

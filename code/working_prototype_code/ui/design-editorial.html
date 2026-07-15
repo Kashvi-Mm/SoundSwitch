@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SoundSwitch — Editorial</title>
+<style>
+  :root {
+    --light-blue: #B8D8D8;
+    --baltic-blue: #22577A;
+    --midnight-violet: #22031F;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--light-blue);
+    color: var(--midnight-violet);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 60px 20px;
+  }
+  .page {
+    width: 100%;
+    max-width: 720px;
+  }
+  h1 {
+    font-size: 40px;
+    font-weight: 800;
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+  }
+  .subtitle {
+    font-size: 14px;
+    color: var(--baltic-blue);
+    margin-bottom: 40px;
+  }
+  .waveform-strip {
+    width: 100%;
+    height: 60px;
+    border-bottom: 2px solid var(--baltic-blue);
+    margin-bottom: 44px;
+  }
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .pill {
+    padding: 10px 20px;
+    border-radius: 999px;
+    border: 1.5px solid var(--baltic-blue);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--baltic-blue);
+  }
+  .pill.filled {
+    background: var(--baltic-blue);
+    color: #fff;
+  }
+  .pill.muted {
+    border-style: dashed;
+    color: var(--midnight-violet);
+    opacity: 0.5;
+  }
+  .legend {
+    margin-top: 50px;
+    font-size: 12px;
+    color: var(--baltic-blue);
+    border-top: 1px solid var(--baltic-blue);
+    padding-top: 16px;
+  }
+</style>
+</head>
+<body>
+  <div class="page">
+    <h1>SoundSwitch</h1>
+    <div class="subtitle">what you're hearing right now</div>
+    <div class="waveform-strip"></div>
+    <div class="pills">
+      <div class="pill filled">Speech</div>
+      <div class="pill">Traffic</div>
+      <div class="pill">Mechanical Hums</div>
+      <div class="pill muted">Other · always on</div>
+    </div>
+    <div class="legend">Filled = currently detected &nbsp;·&nbsp; Outlined = not present right now</div>
+  </div>
+</body>
+</html>

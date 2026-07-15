@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SoundSwitch — Sage</title>
+<style>
+  :root {
+    --bg: #F6F3EC;
+    --panel-bg: #ffffff;
+    --sage: #6B9080;
+    --sage-deep: #3A5A50;
+    --text: #2E3B36;
+    --off-track: #E3E7E2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 50px 20px;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .app-header {
+    margin-bottom: 26px;
+  }
+  .app-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--sage-deep);
+  }
+  .app-subtitle {
+    font-size: 13px;
+    color: var(--sage);
+    margin-top: 2px;
+  }
+
+  .panel-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--sage);
+    margin-bottom: 8px;
+  }
+  .spectrogram-placeholder {
+    width: 100%;
+    height: 120px;
+    border-radius: 16px;
+    background: var(--panel-bg);
+    margin-bottom: 28px;
+  }
+
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .card {
+    background: var(--panel-bg);
+    border-radius: 18px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--sage-deep);
+  }
+  .card-meta {
+    font-size: 11px;
+    color: var(--sage);
+    margin-top: 3px;
+  }
+  .switch {
+    width: 44px;
+    height: 26px;
+    border-radius: 999px;
+    background: var(--sage);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .switch::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+  }
+  .switch.off {
+    background: var(--off-track);
+  }
+  .switch.off::after {
+    right: auto;
+    left: 3px;
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="app-header">
+      <div class="app-title">SoundSwitch</div>
+      <div class="app-subtitle">live category control</div>
+    </div>
+
+    <div class="panel-label">Live Spectrogram</div>
+    <div class="spectrogram-placeholder"></div>
+
+    <div class="cards">
+      <div class="card">
+        <div><div class="card-name">Speech</div><div class="card-meta">direct speech</div></div>
+        <div class="switch"></div>
+      </div>
+      <div class="card">
+        <div><div class="card-name">Traffic</div><div class="card-meta">vehicles, horns</div></div>
+        <div class="switch off"></div>
+      </div>
+      <div class="card">
+        <div><div class="card-name">Mechanical Hums</div><div class="card-meta">engines, fans</div></div>
+        <div class="switch off"></div>
+      </div>
+      <div class="card">
+        <div><div class="card-name">Other</div><div class="card-meta">always audible</div></div>
+        <div class="switch"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
